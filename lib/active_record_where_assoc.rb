@@ -19,6 +19,7 @@ module ActiveRecordWhereAssoc
                            ignore_limit: false,
                            never_alias_limit: false,
                            poly_belongs_to: :raise,
+                           foreign_key: nil,
                          }
   end
 end

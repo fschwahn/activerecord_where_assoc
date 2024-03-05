@@ -236,7 +236,7 @@ module ActiveRecordWhereAssoc
         elsif on_poly_belongs_to
           alias_scope, join_constraints = wrapper_and_join_constraints(record_class, reflection, poly_belongs_to_klass: klass)
         else
-          alias_scope, join_constraints = wrapper_and_join_constraints(record_class, reflection)
+          alias_scope, join_constraints = wrapper_and_join_constraints(record_class, reflection, foreign_key: options[:foreign_key])
         end
 
         assoc_scopes.each do |callable|
@@ -404,7 +404,7 @@ module ActiveRecordWhereAssoc
       join_keys = ActiveRecordCompat.join_keys(reflection, poly_belongs_to_klass)
 
       key = join_keys.key
-      foreign_key = join_keys.foreign_key
+      foreign_key = options[:foreign_key] || join_keys.foreign_key
 
       table = (poly_belongs_to_klass || reflection.klass).arel_table
       foreign_klass = reflection.send(:actual_source_reflection).active_record
@@ -424,7 +424,9 @@ module ActiveRecordWhereAssoc
         foreign_table = ALIAS_TABLE
       end
 
-      constraints = table[key].eq(foreign_table[foreign_key])
+      foreign_key = foreign_table[foreign_key] unless foreign_key.is_a?(Arel::Expressions)
+
+      constraints = table[key].eq(foreign_key)
 
       if reflection.type
         # Handling of the polymorphic has_many/has_one's type column
